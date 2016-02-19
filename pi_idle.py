@@ -5,7 +5,7 @@ import tkinter as tk
 
 class HomeIdleScreen(pi_home.Layer):
     def __init__(self, master):
-        pi_home.Layer.__init__(self, master, bg='black', width=800, height=400)
+        pi_home.Layer.__init__(self, master, bg='black', width=pi_home.WIDTH, height=pi_home.HEIGHT)
         self.time = tk.Label(self,
                              font="Ariel 40",
                              fg='dark orange',
@@ -16,6 +16,6 @@ class HomeIdleScreen(pi_home.Layer):
 
     def update_time(self, event=None):
         self.time.config(text=str(time.asctime()))
-        self.time.place(x=400-(self.time.winfo_reqwidth()/2), y=200-(self.time.winfo_reqheight()/2))
+        self.time.place(x=pi_home.WIDTH/2-(self.time.winfo_reqwidth()/2), y=pi_home.HEIGHT/2-(self.time.winfo_reqheight()/2))
         self.after(50, self.update_time)
 

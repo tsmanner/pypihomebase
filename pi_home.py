@@ -3,6 +3,9 @@
 import pi_idle
 import tkinter as tk
 
+WIDTH = 700
+HEIGHT = 300
+
 
 class Layer(tk.Frame):
     def __init__(self, *args, **kwargs):
@@ -20,17 +23,17 @@ class Layer(tk.Frame):
 
 class HomeScreen(Layer):
     def __init__(self, master):
-        Layer.__init__(self, master, width=800, height=400)
-        self.box1 = tk.LabelFrame(self, text="BOX 1", width=400, height=400)
+        Layer.__init__(self, master, width=WIDTH, height=HEIGHT)
+        self.box1 = tk.LabelFrame(self, text="BOX 1", width=WIDTH/2, height=HEIGHT)
         self.box1.pack(side=tk.LEFT)
-        self.box2 = tk.LabelFrame(self, text="BOX 2", width=400, height=400)
+        self.box2 = tk.LabelFrame(self, text="BOX 2", width=WIDTH/2, height=HEIGHT)
         self.box2.pack(side=tk.LEFT)
 
 
 class HomeGui(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        self.minsize(width=800, height=400)
+        self.minsize(width=WIDTH, height=HEIGHT)
         self.wm_title("12 Pine Echo Home")
         self.swap_button = tk.Button(self, text="Swap", bg="black", fg="dark orange", command=self.swap)
         self.swap_button.pack(side=tk.TOP, fill=tk.X)
