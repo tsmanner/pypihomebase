@@ -1,68 +1,45 @@
 #! python3
 
-import pi_idle
+import pi_screen
 import tkinter as tk
-
-WIDTH = 700
-HEIGHT = 300
-
-
-class Layer(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.visible = False
-
-    def pack(self, *args, **kwargs):
-        tk.Frame.pack(self, *args, **kwargs)
-        self.visible = True
-
-    def pack_forget(self):
-        tk.Frame.pack_forget(self)
-        self.visible = False
-
-
-class HomeScreen(Layer):
-    def __init__(self, master):
-        Layer.__init__(self, master, width=WIDTH, height=HEIGHT)
-        self.box1 = tk.LabelFrame(self, text="BOX 1", width=WIDTH/2, height=HEIGHT)
-        self.box1.pack(side=tk.LEFT)
-        self.box2 = tk.LabelFrame(self, text="BOX 2", width=WIDTH/2, height=HEIGHT)
-        self.box2.pack(side=tk.LEFT)
 
 
 class HomeGui(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        self.minsize(width=WIDTH, height=HEIGHT)
+        self.overrideredirect(1)
+        self.width = self.winfo_screenwidth()
+        self.height = self.winfo_screenheight()
+        self.geometry("%dx%d+%d+%d" % (self.width, self.height, 0, 0))
+        self.focus_set()
+        self.bind_all("<Escape>", lambda e: e.widget.quit())
         self.wm_title("12 Pine Echo Home")
-        self.swap_button = tk.Button(self, text="Swap", bg="black", fg="dark orange", command=self.swap)
-        self.swap_button.pack(side=tk.TOP, fill=tk.X)
-        self.idle_screen = pi_idle.HomeIdleScreen(self)
-        self.idle_screen.pack(fill=tk.BOTH)
-        self.home_screen = HomeScreen(self)
+        self.idle_screen = pi_screen.HomeIdleScreen(self)
+        self.home_screen = pi_screen.HomeScreen(self)
         self.idle_timer_id = None
-        self.bind("*", self.set_idle_timer)
-        self.set_idle_timer()
+        self.bind_all("<Key>", self.set_idle_timer)
+        self.bind_all("<Motion>", self.set_idle_timer)
+        self.do_home_screen()
 
-    def set_idle_timer(self):
-        self.idle_timer_id = self.after(5000, self.swap, "idle")
-
-    def swap(self, reason="swap", event=None):
-        print("In swap", reason)
+    def set_idle_timer(self, event=None):
+        if self.idle_timer_id:
+            self.after_cancel(self.idle_timer_id)
+        self.idle_timer_id = self.after(3000, self.do_idle_screen)
         if self.idle_screen.visible:
-            if reason == "idle":
-                return
-            self.idle_screen.pack_forget()
-            self.swap_button.config(bg="white", fg="black")
-            self.home_screen.pack(fill=tk.BOTH)
-            self.idle_timer_id = self.after(5000, self.swap, "idle")
-        elif self.home_screen.visible:
-            self.home_screen.pack_forget()
-            self.swap_button.config(bg="black", fg="dark orange")
-            self.idle_screen.pack(fill=tk.BOTH)
-            if self.idle_timer_id:
-                self.after_cancel(self.idle_timer_id)
-                self.idle_timer_id = None
+            self.do_home_screen()
+
+    def do_idle_screen(self, event=None):
+        self.home_screen.pack_forget()
+        x = (self.width/2) - (self.idle_screen.time.winfo_reqwidth()/2)
+        y = (self.height/2) - (self.idle_screen.time.winfo_reqheight()/2)
+        self.idle_screen.place(x=x, y=y)
+        self.config(bg="black")
+
+    def do_home_screen(self, event=None):
+        self.idle_screen.place_forget()
+        self.home_screen.pack(fill=tk.BOTH)
+        self.config(bg="dark gray")
+        self.set_idle_timer()
 
 if __name__ == "__main__":
     home = HomeGui()
