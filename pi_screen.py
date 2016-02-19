@@ -1,44 +1,46 @@
-import pi_home
+import PIL
 import time
 import tkinter as tk
 
 
 class Layer(tk.Frame):
     def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.visible = False
 
     def pack(self, *args, **kwargs):
-        tk.Frame.pack(self, *args, **kwargs)
+        super().pack(*args, **kwargs)
         self.visible = True
 
     def place(self, *args, **kwargs):
-        tk.Frame.place(self, *args, **kwargs)
+        super().place(*args, **kwargs)
         self.visible = True
 
     def pack_forget(self):
-        tk.Frame.pack_forget(self)
+        super().pack_forget()
         self.visible = False
 
     def place_forget(self):
-        tk.Frame.place_forget(self)
+        super().place_forget()
         self.visible = False
 
 
-class HomeScreen(Layer):  # TODO this doesn't display!
+class HomeScreen(Layer):
     def __init__(self, master):
-        Layer.__init__(self, master, width=master.width, height=master.height)
-        self.box1 = tk.LabelFrame(self, text="BOX 1")
-        self.box1.pack(side=tk.LEFT)
-        self.box2 = tk.LabelFrame(self, text="BOX 2")
-        self.box2.pack(side=tk.LEFT)
+        super().__init__(master, width=master.width, height=master.height)
+        self.images = {"enceladus": tk.PhotoImage(file="enceladus.gif"),
+                       "grand tour": tk.PhotoImage(file="grand_tour.gif")}
+        self.enceladus_button = tk.Button(self, image=self.images["enceladus"], bd=0)
+        self.enceladus_button.pack(side=tk.LEFT)
+        self.grand_tour_button = tk.Button(self, image=self.images["grand tour"], bd=0)
+        self.grand_tour_button.pack(side=tk.LEFT)
 
 
 class HomeIdleScreen(Layer):
     def __init__(self, master):
-        Layer.__init__(self, master, bg='black')
+        super().__init__(master, bg='black')
         self.time = tk.Label(self,
-                             font="Ariel 40",
+                             font="Ariel 80",
                              fg='dark orange',
                              bg='black',
                              anchor=tk.N)
