@@ -43,7 +43,7 @@ class HomeScreen(Layer):
 
     @staticmethod
     def open_browser(event=None):
-        webbrowser.open("www.google.com", new=1)
+        webbrowser.open("http://www.google.com", new=1)
 
 
 class HomeIdleScreen(tk.Toplevel):
