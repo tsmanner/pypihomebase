@@ -40,9 +40,12 @@ class HomeScreen(Layer):
         self.grand_tour_button.pack(side=tk.LEFT)
 
 
-class HomeIdleScreen(Layer):
+class HomeIdleScreen(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master, bg='black')
+        #self.attributes('-fullscreen', True)
+        self.config(bg="black", cursor="none")
+        #self.attributes("-topmost", True)
         self.update_time_id = None
         self.time = tk.Label(self,
                              font="Ariel 80",
@@ -59,8 +62,13 @@ class HomeIdleScreen(Layer):
     def update_time(self, event=None):
         self.time.config(text=time.strftime("%H:%M:%S"))
         self.date.config(text=time.strftime("%A, %B %d %Y"))
-        self.time.pack(side=tk.TOP)
-        self.date.pack(side=tk.TOP)
+        # Place time in the center and then date just below the bottom of it
+        x = (self.winfo_screenwidth()/2) - (self.time.winfo_reqwidth()/2)
+        y = (self.winfo_screenheight()/2) - (self.time.winfo_reqheight()/2)
+        self.time.place(x=x, y=y)
+        x = (self.winfo_screenwidth()/2) - (self.date.winfo_reqwidth()/2)
+        y = self.time.winfo_y() + self.time.winfo_reqheight()
+        self.date.place(x=x, y=y)
         self.update_time_id = self.after(50, self.update_time)
 
     def place(self, *args, **kwargs):
