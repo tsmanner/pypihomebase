@@ -1,6 +1,7 @@
 import os
 import time
 import tkinter as tk
+import webbrowser
 
 
 class Layer(tk.Frame):
@@ -36,8 +37,13 @@ class HomeScreen(Layer):
                                           command=master.screen_lock)
         self.enceladus_button.pack(side=tk.LEFT)
         self.grand_tour_button = tk.Button(self, bd=0,
-                                           image=self.images["grand tour"])
+                                           image=self.images["grand tour"],
+                                           command=self.open_browser)
         self.grand_tour_button.pack(side=tk.LEFT)
+
+    @staticmethod
+    def open_browser(event=None):
+        webbrowser.open("www.google.com", new=1)
 
 
 class HomeIdleScreen(tk.Toplevel):

@@ -5,8 +5,8 @@ import pi_screen
 import tkinter as tk
 
 IDLE_UPDATE = 10
-DEFAULT_TIMER = 1000
-LOCK_TIMER = 5000
+DEFAULT_TIMER = 3000
+LOCK_TIMER = 10000
 
 
 class HomeGui(tk.Tk):
