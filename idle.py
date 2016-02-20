@@ -65,7 +65,7 @@ def idle():
     """
     # Windows
     if os.name == 'nt':
-       last_input_info = LastInputInfo()
+        last_input_info = LastInputInfo()
         last_input_info.cbSize = ctypes.sizeof(last_input_info)
         ctypes.windll.user32.GetLastInputInfo(ctypes.byref(last_input_info))
         return float(ctypes.windll.kernel32.GetTickCount() - last_input_info.dwTime)
