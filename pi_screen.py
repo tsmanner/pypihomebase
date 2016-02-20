@@ -43,9 +43,9 @@ class HomeScreen(Layer):
 class HomeIdleScreen(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master, bg='black')
-        #self.attributes('-fullscreen', True)
+        self.attributes('-fullscreen', True)
         self.config(bg="black", cursor="none")
-        #self.attributes("-topmost", True)
+        self.attributes("-topmost", True)
         self.update_time_id = None
         self.time = tk.Label(self,
                              font="Ariel 80",

@@ -12,7 +12,7 @@ LOCK_TIMER = 5000
 class HomeGui(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        #self.attributes('-fullscreen', True)
+        self.attributes('-fullscreen', True)
         self.width = self.winfo_screenwidth()
         self.height = self.winfo_screenheight()
         self.focus_set()

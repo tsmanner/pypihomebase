@@ -78,8 +78,6 @@ def idle():
             return None
         return xss_info_p.contents.idle
 
-# test
-
 if __name__ == '__main__':
     import time
     while True:
