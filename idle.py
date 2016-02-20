@@ -2,7 +2,6 @@ import ctypes
 import ctypes.util
 import os
 
-
 class XScreenSaverInfo(ctypes.Structure):
     _fields_ = [
             ('window', ctypes.c_ulong),
@@ -31,19 +30,19 @@ try:
     libX11.XDefaultRootWindow.restype = xid
     libX11.XDefaultRootWindow.argtypes = display_p,
 
-    lib_xss_path = ctypes.util.find_library('Xss')
-    if lib_xss_path == None:
+    libXsspath = ctypes.util.find_library('Xss')
+    if libXsspath == None:
         raise OSError('libXss could not be found.')
-    lib_xss = ctypes.cdll.LoadLibrary(lib_xss_path)
-    lib_xss.XScreenSaverQueryExtension.argtypes = display_p, c_int_p, c_int_p
-    lib_xss.XScreenSaverAllocInfo.restype = XScreenSaverInfo_p
-    lib_xss.XScreenSaverQueryInfo.argtypes = (display_p, xid, XScreenSaverInfo_p)
+    libXss = ctypes.cdll.LoadLibrary(libXsspath)
+    libXss.XScreenSaverQueryExtension.argtypes = display_p, c_int_p, c_int_p
+    libXss.XScreenSaverAllocInfo.restype = XScreenSaverInfo_p
+    libXss.XScreenSaverQueryInfo.argtypes = (display_p, xid, XScreenSaverInfo_p)
 
     dpy_p = libX11.XOpenDisplay(None)
     if dpy_p == None:
         raise OSError('Could not open X Display.')
 
-    xss_info_p = lib_xss.XScreenSaverAllocInfo()
+    xss_info_p = libXss.XScreenSaverAllocInfo()
     if xss_info_p == None:
         raise OSError('XScreenSaverAllocInfo: Out of Memory.')
 
@@ -54,18 +53,35 @@ except OSError as err:
     xss_available = False
     raise(err)
 
-def getIdleSec():
-    global xss_available
+
+class LastInputInfo(ctypes.Structure):
+    _fields_ = [('cbSize', ctypes.c_uint), ('dwTime', ctypes.c_uint)]
+
+
+def idle():
     """
-    Return the idle time in milliseconds
+    Returns ms since last user input
+    :return: int
     """
-    xss_info = lib_xss.XScreenSaverAllocInfo()
-    if lib_xss.XScreenSaverQueryInfo(dpy_p, rootwindow, xss_info) == 0:
-        return None
-    return xss_info.contents.idle
+    # Windows
+    if os.name == 'nt':
+       last_input_info = LastInputInfo()
+        last_input_info.cbSize = ctypes.sizeof(last_input_info)
+        ctypes.windll.user32.GetLastInputInfo(ctypes.byref(last_input_info))
+        return float(ctypes.windll.kernel32.GetTickCount() - last_input_info.dwTime)
+    else:
+        """
+        Return the idle time in milliseconds
+        """
+        xss_info_p = libXss.XScreenSaverAllocInfo()
+        if libXss.XScreenSaverQueryInfo(dpy_p, rootwindow, xss_info_p) == 0:
+            return None
+        return xss_info_p.contents.idle
+
+# test
 
 if __name__ == '__main__':
     import time
     while True:
-        print(getIdleSec())
+        print(idle())
         time.sleep(2)
