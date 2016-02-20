@@ -3,6 +3,9 @@
 import pi_screen
 import tkinter as tk
 
+DEFAULT_TIMER = 1000
+LOCK_TIMER = 5000
+
 
 class HomeGui(tk.Tk):
     def __init__(self):
@@ -18,29 +21,42 @@ class HomeGui(tk.Tk):
         self.idle_screen = pi_screen.HomeIdleScreen(self)
         self.home_screen = pi_screen.HomeScreen(self)
         self.idle_timer_id = None
+        self.idle_delay = DEFAULT_TIMER
         self.bind_all("<Key>", self.set_idle_timer)
         self.bind_all("<Button>", self.set_idle_timer)
         self.bind_all("<Motion>", self.set_idle_timer)
         self.do_home_screen()
 
+    def screen_lock(self):
+        self.idle_delay = LOCK_TIMER
+        self.set_idle_timer()
+
     def set_idle_timer(self, event=None):
         if self.idle_timer_id:
             self.after_cancel(self.idle_timer_id)
-        self.idle_timer_id = self.after(1000, self.do_idle_screen)
+        self.idle_timer_id = self.after(self.idle_delay, self.do_idle_screen)
         if self.idle_screen.visible:
             self.do_home_screen()
 
     def do_idle_screen(self, event=None):
-        self.home_screen.pack_forget()
-        x = (self.width/2) - (self.idle_screen.time.winfo_reqwidth()/2)
-        y = (self.height/2) - (self.idle_screen.time.winfo_reqheight()/2)
+        self.idle_delay = DEFAULT_TIMER
+        self.home_screen.place_forget()
+        self.update_idletasks()
+        x = (self.width/2) - (self.idle_screen.winfo_reqwidth()/2)
+        y = (self.height/2) - (self.idle_screen.winfo_reqheight()/2)
         self.idle_screen.place(x=x, y=y)
         self.config(bg="black")
         self.config(cursor="none")
+        self.attributes("-topmost", True)
 
     def do_home_screen(self, event=None):
+        self.attributes("-topmost", False)
+        self.lower() #  TODO lower it to bottom if it wasn't on top when it went idle
         self.idle_screen.place_forget()
-        self.home_screen.pack()
+        self.update_idletasks()
+        x = (self.width/2) - (self.home_screen.winfo_reqwidth()/2)
+        y = (self.height/2) - (self.home_screen.winfo_reqheight()/2)
+        self.home_screen.place(x=x, y=y)
         self.config(bg="dark gray")
         self.set_idle_timer()
         self.config(cursor="")

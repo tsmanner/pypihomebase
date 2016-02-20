@@ -27,12 +27,16 @@ class Layer(tk.Frame):
 
 class HomeScreen(Layer):
     def __init__(self, master):
-        super().__init__(master, width=master.width, height=master.height)
+        super().__init__(master)
+        self.config(width=master.width, height=master.height)
         self.images = {"enceladus": tk.PhotoImage(file="enceladus.gif"),
                        "grand tour": tk.PhotoImage(file="grand_tour.gif")}
-        self.enceladus_button = tk.Button(self, image=self.images["enceladus"], bd=0)
+        self.enceladus_button = tk.Button(self, bd=0,
+                                          image=self.images["enceladus"],
+                                          command=master.screen_lock)
         self.enceladus_button.pack(side=tk.LEFT)
-        self.grand_tour_button = tk.Button(self, image=self.images["grand tour"], bd=0)
+        self.grand_tour_button = tk.Button(self, bd=0,
+                                           image=self.images["grand tour"])
         self.grand_tour_button.pack(side=tk.LEFT)
 
 
