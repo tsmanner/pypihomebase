@@ -95,7 +95,7 @@ def git_update():
         line_split = line.split()
         if len(line_split) == 0:
             continue
-        elif len(line_split) == 7:
+        elif len(line_split) >= 3:
             if line_split[0].isdigit() and \
                             line_split[1] == "file" and \
                             line_split[2] == "changed":
