@@ -1,6 +1,7 @@
 import ctypes
 import ctypes.util
 import os
+import subprocess
 
 LastInputInfo = None
 
@@ -10,13 +11,15 @@ if os.name == 'nt':
 else:
     class XScreenSaverInfo(ctypes.Structure):
         _fields_ = [
-                ('window', ctypes.c_ulong),
-                ('state', ctypes.c_int),
-                ('kind', ctypes.c_int),
-                ('til_or_since', ctypes.c_ulong),
-                ('idle', ctypes.c_ulong),
-                ('eventMask', ctypes.c_ulong)
+            ('window', ctypes.c_ulong),
+            ('state', ctypes.c_int),
+            ('kind', ctypes.c_int),
+            ('til_or_since', ctypes.c_ulong),
+            ('idle', ctypes.c_ulong),
+            ('eventMask', ctypes.c_ulong)
         ]
+
+
     XScreenSaverInfo_p = ctypes.POINTER(XScreenSaverInfo)
 
     display_p = ctypes.c_void_p
@@ -75,8 +78,33 @@ def idle():
             return None
         return xss_info_p.contents.idle
 
+
+def git_update():
+    """
+    git_update: pulls from the git
+    :return: bool indicating whether there was an update done
+    """
+    cwd = os.getcwd()
+    os.chdir(os.path.dirname(__file__))
+    git_output = subprocess.run(["git", "pull", "origin", "master"], stdout=subprocess.PIPE)
+    os.chdir(cwd)
+    git_output_lines = git_output.stdout.decode("UTF-8").split(os.linesep)
+    for line in git_output_lines:
+        line_split = line.split()
+        if len(line_split) == 0:
+            continue
+        elif len(line_split) == 7:
+            if line_split[0].isdigit() and \
+                            line_split[1] == "file" and \
+                            line_split[2] == "changed":
+                return True
+    return False
+
+
 if __name__ == '__main__':
     import time
+
     while True:
         print(idle())
-        time.sleep(2)
+        print(git_update())
+        time.sleep(5)
