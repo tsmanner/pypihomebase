@@ -9,8 +9,9 @@ import tkinter as tk
 IDLE_UPDATE = 10
 IDLE_DELAY = 5000
 LOCKED_DELAY = 10000
-MOUSE_HIDE_DELAY = 1500
+MOUSE_HIDE_DELAY = 500
 UPDATE_DELAY = 5000
+CURSOR = "crosshair"
 
 
 class HomeGui(tk.Tk):
@@ -38,7 +39,8 @@ class HomeGui(tk.Tk):
         self.home_screen.place(x=x, y=y)
         self.update_idle_timer()
         self.check_for_updates()
-        self.mouse_hide_timer_id = self.after(MOUSE_HIDE_DELAY, self.hide_mouse)
+        self.mouse_hide_timer_id = None
+        self.show_mouse()
         self.bind_all("<Motion>", self.show_mouse)
 
     def screen_lock(self):
@@ -65,8 +67,6 @@ class HomeGui(tk.Tk):
 
     def check_for_updates(self, event=None):
         updated = common.git_update()
-        #print(updated)
-        #print("******************************")
         if updated:
             os.execl(sys.executable, sys.executable, *sys.argv)
         self.after(UPDATE_DELAY, self.check_for_updates)
@@ -78,7 +78,7 @@ class HomeGui(tk.Tk):
     def show_mouse(self, event=None):
         if self.mouse_hide_timer_id:
             self.after_cancel(self.mouse_hide_timer_id)
-        self.config(cursor="")
+        self.config(cursor=CURSOR)
         self.mouse_hide_timer_id = self.after(MOUSE_HIDE_DELAY, self.hide_mouse)
 
 
