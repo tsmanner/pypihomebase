@@ -90,6 +90,7 @@ def git_update():
     os.chdir(cwd)
     git_output_lines = git_process.communicate()[0].decode("UTF-8").split(os.linesep)
     for line in git_output_lines:
+        print(line.strip())
         line_split = line.split()
         if len(line_split) == 0:
             continue
