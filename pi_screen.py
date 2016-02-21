@@ -30,8 +30,8 @@ class HomeScreen(Layer):
     def __init__(self, master):
         super().__init__(master)
         self.config(width=master.width, height=master.height)
-        self.images = {"enceladus": tk.PhotoImage(file="enceladus.gif"),
-                       "grand tour": tk.PhotoImage(file="grand_tour.gif")}
+        self.images = {"enceladus": tk.PhotoImage(file=os.path.dirname(__file__) + os.sep + "enceladus.gif"),
+                       "grand tour": tk.PhotoImage(file=os.path.dirname(__file__) + os.sep + "grand_tour.gif")}
         self.enceladus_button = tk.Button(self, bd=0,
                                           image=self.images["enceladus"],
                                           command=master.screen_lock)
@@ -40,10 +40,16 @@ class HomeScreen(Layer):
                                            image=self.images["grand tour"],
                                            command=self.open_browser)
         self.grand_tour_button.pack(side=tk.LEFT)
+        self.quit_button = tk.Button(self, bd=0,
+                                     text="X",
+                                     font="Ariel 8",
+                                     command=self.master.quit)
+        self.update_idletasks()
+        self.quit_button.place(x=self.winfo_reqwidth()-self.quit_button.winfo_reqwidth(), y=0)
 
     @staticmethod
     def open_browser(event=None):
-        webbrowser.open("http://www.google.com", new=1)
+        webbrowser.open("http://www.google.com")
 
 
 class HomeIdleScreen(tk.Toplevel):

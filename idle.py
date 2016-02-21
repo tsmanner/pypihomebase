@@ -2,6 +2,8 @@ import ctypes
 import ctypes.util
 import os
 
+LastInputInfo = None
+
 if os.name == 'nt':
     class LastInputInfo(ctypes.Structure):
         _fields_ = [('cbSize', ctypes.c_uint), ('dwTime', ctypes.c_uint)]
