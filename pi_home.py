@@ -15,10 +15,14 @@ UPDATE_TIMER = 5000
 class HomeGui(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        #self.attributes('-fullscreen', True)
-        self.config(width=800, height=480)
-        self.width = 800 #  self.winfo_screenwidth()
-        self.height = 480 #  self.winfo_screenheight()
+        if os.name == "nt":
+            self.config(width=800, height=480)
+            self.width = 800
+            self.height = 480
+        else:
+            self.attributes('-fullscreen', True)
+            self.width = self.winfo_screenwidth()
+            self.height = self.winfo_screenheight()
         self.focus_set()
         self.bind_all("<Escape>", lambda e: e.widget.quit())
         self.wm_title("12 Pine Echo Home")
