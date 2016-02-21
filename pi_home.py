@@ -20,7 +20,7 @@ class HomeGui(tk.Tk):
         self.wm_title("12 Pine Echo Home")
         self.idle_screen = None
         self.config(bg="dark gray")
-        self.config(cursor="")
+        self.config(cursor="left_ptr")
         self.idle_delay = DEFAULT_TIMER
         self.home_screen = pi_screen.HomeScreen(self)
         self.update_idletasks()
