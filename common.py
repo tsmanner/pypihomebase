@@ -89,6 +89,7 @@ def git_update():
     git_process = subprocess.Popen(["git", "pull", "origin", "master"], stdout=subprocess.PIPE)
     os.chdir(cwd)
     git_output_lines = git_process.communicate()[0].decode("UTF-8").split(os.linesep)
+    print("******************************")
     for line in git_output_lines:
         print(line.strip())
         line_split = line.split()

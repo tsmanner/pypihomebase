@@ -63,6 +63,7 @@ class HomeGui(tk.Tk):
     def check_for_updates(self, event=None):
         updated = common.git_update()
         print(updated)
+        print("******************************")
         if updated:
             os.execl(sys.executable, sys.executable, *sys.argv)
         self.after(UPDATE_TIMER, self.check_for_updates)
