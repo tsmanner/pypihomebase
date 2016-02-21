@@ -36,7 +36,6 @@ class HomeGui(tk.Tk):
         y = (self.height/2) - (self.home_screen.winfo_reqheight()/2)
         self.home_screen.place(x=x, y=y)
         self.update_idle_timer()
-        self.check_for_updates_id = None
         self.check_for_updates()
 
     def screen_lock(self):
