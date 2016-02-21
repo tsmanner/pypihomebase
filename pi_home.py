@@ -7,9 +7,10 @@ import sys
 import tkinter as tk
 
 IDLE_UPDATE = 10
-DEFAULT_TIMER = 3000
-LOCK_TIMER = 10000
-UPDATE_TIMER = 5000
+IDLE_DELAY = 5000
+LOCKED_DELAY = 10000
+MOUSE_HIDE_DELAY = 1500
+UPDATE_DELAY = 5000
 
 
 class HomeGui(tk.Tk):
@@ -29,7 +30,7 @@ class HomeGui(tk.Tk):
         self.idle_screen = None
         self.config(bg="dark gray")
         self.config(cursor="left_ptr")
-        self.idle_delay = DEFAULT_TIMER
+        self.idle_delay = IDLE_DELAY
         self.home_screen = pi_screen.HomeScreen(self)
         self.update_idletasks()
         x = (self.width/2) - (self.home_screen.winfo_reqwidth()/2)
@@ -37,9 +38,11 @@ class HomeGui(tk.Tk):
         self.home_screen.place(x=x, y=y)
         self.update_idle_timer()
         self.check_for_updates()
+        self.mouse_hide_timer_id = self.after(MOUSE_HIDE_DELAY, self.hide_mouse)
+        self.bind_all("<Motion>", self.show_mouse)
 
     def screen_lock(self):
-        self.idle_delay = LOCK_TIMER
+        self.idle_delay = LOCKED_DELAY
 
     def update_idle_timer(self, event=None):
         # Check the time and see if we should go idle, if not update the time again
@@ -52,7 +55,7 @@ class HomeGui(tk.Tk):
         self.after(IDLE_UPDATE, self.update_idle_timer)
 
     def do_idle_screen(self, event=None):
-        self.idle_delay = DEFAULT_TIMER
+        self.idle_delay = IDLE_DELAY
         self.idle_screen = pi_screen.HomeIdleScreen(self)
 
     def do_home_screen(self, event=None):
@@ -62,11 +65,22 @@ class HomeGui(tk.Tk):
 
     def check_for_updates(self, event=None):
         updated = common.git_update()
-        print(updated)
+        #print(updated)
         #print("******************************")
         if updated:
             os.execl(sys.executable, sys.executable, *sys.argv)
-        self.after(UPDATE_TIMER, self.check_for_updates)
+        self.after(UPDATE_DELAY, self.check_for_updates)
+
+    def hide_mouse(self, event=None):
+        self.config(cursor="none")
+        self.mouse_hide_timer_id = None
+
+    def show_mouse(self, event=None):
+        if self.mouse_hide_timer_id:
+            self.after_cancel(self.mouse_hide_timer_id)
+        self.config(cursor="")
+        self.mouse_hide_timer_id = self.after(MOUSE_HIDE_DELAY, self.hide_mouse)
+
 
 if __name__ == "__main__":
     home = HomeGui()
