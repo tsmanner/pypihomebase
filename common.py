@@ -2,6 +2,7 @@ import ctypes
 import ctypes.util
 import os
 import subprocess
+import webbrowser
 
 LastInputInfo = None
 
@@ -55,7 +56,8 @@ else:
         rootwindow = libX11.XDefaultRootWindow(dpy_p)
     except OSError as err:
         # Logging?
-        raise err
+        print(err, "Idle timeout not available.")
+#        raise err
 
 
 def idle():
@@ -105,13 +107,16 @@ def git_update():
 
 def open_shell():
     if os.name == "nt":
+        # TODO how does this work in Windows?
         print("opening cmd.exe")
-        shell_process = subprocess.Popen(["cmd.exe"])
-        shell_process.communicate()
     else:
         print("opening lxterminal")
         shell_process = subprocess.Popen(["lxterminal"])
         shell_process.communicate()
+
+
+def open_browser(event=None):
+    webbrowser.open("http://www.google.com")
 
 
 if __name__ == '__main__':

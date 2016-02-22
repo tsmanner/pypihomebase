@@ -1,17 +1,11 @@
 #! python3
 
 import common
+from config import config
 import os
 import pi_screen
 import sys
 import tkinter as tk
-
-IDLE_UPDATE = 10
-IDLE_DELAY = 5000
-LOCKED_DELAY = 10000
-MOUSE_HIDE_DELAY = 500
-UPDATE_DELAY = 5000
-CURSOR = "crosshair"
 
 
 class HomeGui(tk.Tk):
@@ -32,7 +26,7 @@ class HomeGui(tk.Tk):
         self.idle_screen = None
         self.config(bg="dark gray")
         self.config(cursor="left_ptr")
-        self.idle_delay = IDLE_DELAY
+        self.idle_delay = config["Idle Delay"]
         self.home_screen = pi_screen.HomeScreen(self)
         self.update_idletasks()
         x = (self.width/2) - (self.home_screen.winfo_reqwidth()/2)
@@ -45,7 +39,10 @@ class HomeGui(tk.Tk):
         self.bind_all("<Motion>", self.show_mouse)
 
     def screen_lock(self):
-        self.idle_delay = LOCKED_DELAY
+        if self.idle_delay == config["Idle Delay"]:
+            self.idle_delay = config["Locked Delay"]
+        elif self.idle_delay == config["Locked Delay"]:
+            self.idle_delay = config["Idle Delay"]
 
     def update_idle_timer(self, event=None):
         # Check the time and see if we should go idle, if not update the time again
@@ -55,10 +52,10 @@ class HomeGui(tk.Tk):
         else:
             if common.idle() > self.idle_delay:
                 self.do_idle_screen()
-        self.after(IDLE_UPDATE, self.update_idle_timer)
+        self.after(config["Idle Update"], self.update_idle_timer)
 
     def do_idle_screen(self, event=None):
-        self.idle_delay = IDLE_DELAY
+        self.idle_delay = config["Idle Delay"]
         self.idle_screen = pi_screen.HomeIdleScreen(self)
 
     def do_home_screen(self, event=None):
@@ -70,7 +67,7 @@ class HomeGui(tk.Tk):
         updated = common.git_update()
         if updated:
             os.execl(sys.executable, sys.executable, *sys.argv)
-        self.after(UPDATE_DELAY, self.check_for_updates)
+        self.after(config["Update Delay"], self.check_for_updates)
 
     def hide_mouse(self, event=None):
         self.config(cursor="none")
@@ -79,8 +76,8 @@ class HomeGui(tk.Tk):
     def show_mouse(self, event=None):
         if self.mouse_hide_timer_id:
             self.after_cancel(self.mouse_hide_timer_id)
-        self.config(cursor=CURSOR)
-        self.mouse_hide_timer_id = self.after(MOUSE_HIDE_DELAY, self.hide_mouse)
+        self.config(cursor=config["Cursor"])
+        self.mouse_hide_timer_id = self.after(config["Mouse Hide Delay"], self.hide_mouse)
 
 
 if __name__ == "__main__":
