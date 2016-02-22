@@ -21,6 +21,7 @@ class HomeGui(tk.Tk):
             self.config(width=800, height=480)
             self.width = 800
             self.height = 480
+            self.pack_propagate(0)
         else:
             self.attributes('-fullscreen', True)
             self.width = self.winfo_screenwidth()

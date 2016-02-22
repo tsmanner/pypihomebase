@@ -103,6 +103,17 @@ def git_update():
     return False
 
 
+def open_shell():
+    if os.name == "nt":
+        print("opening cmd.exe")
+        shell_process = subprocess.Popen(["cmd.exe"])
+        shell_process.communicate()
+    else:
+        print("opening lxterminal")
+        shell_process = subprocess.Popen(["lxterminal"])
+        shell_process.communicate()
+
+
 if __name__ == '__main__':
     import time
 
