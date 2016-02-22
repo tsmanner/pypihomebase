@@ -72,7 +72,7 @@ class HomeScreen(Layer):
 
 
 class HomeIdleScreen(tk.Toplevel):
-    TEXT_COLOR = "red"
+    TEXT_COLOR = "dark red"
 
     def __init__(self, master):
         super().__init__(master, bg='black')
