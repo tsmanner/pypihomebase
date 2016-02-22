@@ -72,6 +72,8 @@ class HomeScreen(Layer):
 
 
 class HomeIdleScreen(tk.Toplevel):
+    TEXT_COLOR = "dark red"
+
     def __init__(self, master):
         super().__init__(master, bg='black')
         if os.name == "nt":
@@ -88,12 +90,12 @@ class HomeIdleScreen(tk.Toplevel):
         self.update_time_id = None
         self.time = tk.Label(self,
                              font="Ariel 80",
-                             fg='dark orange',
+                             fg=self.TEXT_COLOR,
                              bg='black',
                              anchor=tk.N)
         self.date = tk.Label(self,
                              font="Ariel 40",
-                             fg='dark orange',
+                             fg=self.TEXT_COLOR,
                              bg='black',
                              anchor=tk.N)
         self.update_time()
