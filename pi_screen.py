@@ -72,14 +72,11 @@ class HomeScreen(Layer):
 
                 pass  # TODO how does this work in windows?
             else:
-                print("Elevating existing shell process")
                 elevate_str = "wmctrl -ia $(wmctrl -lp | awk -vpid={0} '$3==pid {print $1; exit}')"
                 os.system(elevate_str.format(self.shell_process.pid))
         else:
             if self.shell_process:
-                print("Joining derelict shell process")
                 self.shell_process.join()
-            print("Starting new shell")
             self.shell_process = multiprocessing.Process(target=common.open_shell)
             self.shell_process.start()
 
