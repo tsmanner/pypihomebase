@@ -38,14 +38,14 @@ class HomeScreen(Layer):
         super().__init__(master)
         self.config(width=master.width, height=master.height)
         self.images = {"lock": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                             os.sep +
-                                             config["HomeScreen Buttons"]["lock"]["image"]),
+                                                  os.sep +
+                                                  config["HomeScreen Buttons"]["lock"]["image"]),
                        "browser": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                                os.sep +
-                                                config["HomeScreen Buttons"]["browser"]["image"]),
+                                                     os.sep +
+                                                     config["HomeScreen Buttons"]["browser"]["image"]),
                        "terminal": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                                 os.sep +
-                                                 config["HomeScreen Buttons"]["terminal"]["image"])}
+                                                      os.sep +
+                                                      config["HomeScreen Buttons"]["terminal"]["image"])}
         self.screen_lock_button = tk.Button(self, bd=0,
                                             image=self.images["lock"],
                                             command=master.screen_lock)
@@ -80,8 +80,6 @@ class HomeScreen(Layer):
 
 
 class HomeIdleScreen(tk.Toplevel):
-    TEXT_COLOR = "dark red"
-
     def __init__(self, master):
         super().__init__(master, bg='black')
         if os.name == "nt":
@@ -98,17 +96,25 @@ class HomeIdleScreen(tk.Toplevel):
         self.update_time_id = None
         self.time = tk.Label(self,
                              font="Ariel 80",
-                             fg=self.TEXT_COLOR,
                              bg='black',
                              anchor=tk.N)
         self.date = tk.Label(self,
                              font="Ariel 40",
-                             fg=self.TEXT_COLOR,
                              bg='black',
                              anchor=tk.N)
         self.update_time()
 
     def update_time(self, event=None):
+        localtime = time.localtime()
+        day_start = time.strptime(config["Clock Day Start"], "%H:%M")
+        night_start = time.strptime(config["Clock Night Start"], "%H:%M")
+        if (night_start.tm_hour <= localtime.tm_hour and
+                night_start.tm_min <= localtime.tm_min) or \
+                (day_start.tm_hour >= localtime.tm_hour and
+                 day_start.tm_min >= localtime.tm_min):
+            self.time.config(fg=config["Clock Night Color"])
+        else:
+            self.time.config(fg=config["Clock Day Color"])
         self.time.config(text=time.strftime("%H:%M:%S"))
         self.date.config(text=time.strftime("%A, %B %d %Y"))
         # Place time in the center and then date just below the bottom of it
