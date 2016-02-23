@@ -112,12 +112,13 @@ class HomeIdleScreen(tk.Toplevel):
 
     def update_time(self, event=None):
         localtime = time.localtime()
+        local_min = localtime.tm_hour * 60 + localtime.tm_min
         day_start = time.strptime(config["Clock Day Start"], "%H:%M")
+        day_min = day_start.tm_hour * 60 + day_start.tm_min
         night_start = time.strptime(config["Clock Night Start"], "%H:%M")
-        if (night_start.tm_hour <= localtime.tm_hour and
-                night_start.tm_min <= localtime.tm_min) or \
-                (day_start.tm_hour >= localtime.tm_hour and
-                 day_start.tm_min >= localtime.tm_min):
+        night_min = night_start.tm_hour * 60 + night_start.tm_min
+        if night_min <= local_min or \
+                day_min >= local_min:
             self.day.config(fg=config["Clock Night Color"])
             self.time.config(fg=config["Clock Night Color"])
             self.date.config(fg=config["Clock Night Color"])
