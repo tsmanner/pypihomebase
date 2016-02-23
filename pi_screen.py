@@ -67,7 +67,7 @@ class HomeScreen(Layer):
         self.shell_process = None
 
     def open_shell(self, event=None):
-        if self.shell_process:
+        if self.shell_process.is_alive():
             if os.name == "nt":
 
                 pass  # TODO how does this work in windows?
@@ -75,6 +75,8 @@ class HomeScreen(Layer):
                 elevate_str = "wmctrl -ia $(wmctrl -lp | awk -vpid={0} '$3==pid {print $1; exit}')"
                 os.system(elevate_str.format(self.shell_process.pid))
         else:
+            if self.shell_process:
+                self.shell_process.join()
             self.shell_process = multiprocessing.Process(target=common.open_shell)
             self.shell_process.start()
 
