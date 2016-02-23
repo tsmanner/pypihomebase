@@ -96,12 +96,16 @@ class HomeIdleScreen(tk.Toplevel):
             self.height = self.winfo_screenheight()
         self.config(bg="black", cursor="none")
         self.update_time_id = None
+        self.day = tk.Label(self,
+                            font=config["Date Font"],
+                            bg='black',
+                            anchor=tk.N)
         self.time = tk.Label(self,
-                             font="Ariel 80",
+                             font=config["Time Font"],
                              bg='black',
                              anchor=tk.N)
         self.date = tk.Label(self,
-                             font="Ariel 40",
+                             font=config["Date Font"],
                              bg='black',
                              anchor=tk.N)
         self.update_time()
@@ -114,11 +118,16 @@ class HomeIdleScreen(tk.Toplevel):
                 night_start.tm_min <= localtime.tm_min) or \
                 (day_start.tm_hour >= localtime.tm_hour and
                  day_start.tm_min >= localtime.tm_min):
+            self.day.config(fg=config["Clock Night Color"])
             self.time.config(fg=config["Clock Night Color"])
+            self.date.config(fg=config["Clock Night Color"])
         else:
+            self.day.config(fg=config["Clock Day Color"])
             self.time.config(fg=config["Clock Day Color"])
-        self.time.config(text=time.strftime("%H:%M:%S"))
-        self.date.config(text=time.strftime("%A, %B %d %Y"))
+            self.date.config(fg=config["Clock Day Color"])
+        self.day.config(text=time.strftime("%A"))
+        self.time.config(text=time.strftime("%H:%M"))
+        self.date.config(text=time.strftime("%B %d %Y"))
         # Place time in the center and then date just below the bottom of it
         x = (self.width / 2) - (self.time.winfo_reqwidth() / 2)
         y = (self.height / 2) - (self.time.winfo_reqheight() / 2)
@@ -126,4 +135,7 @@ class HomeIdleScreen(tk.Toplevel):
         x = (self.width / 2) - (self.date.winfo_reqwidth() / 2)
         y = self.time.winfo_y() + self.time.winfo_reqheight()
         self.date.place(x=x, y=y)
+        x = (self.width / 2) - (self.day.winfo_reqwidth() / 2)
+        y = self.time.winfo_y() - self.day.winfo_reqheight()
+        self.day.place(x=x, y=y)
         self.update_time_id = self.after(50, self.update_time)
