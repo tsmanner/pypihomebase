@@ -44,8 +44,8 @@ class HomeScreen(Layer):
                                                      os.sep +
                                                      config["HomeScreen Buttons"]["browser"]["image"]),
                        "terminal": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                                      os.sep +
-                                                      config["HomeScreen Buttons"]["terminal"]["image"])}
+                                                 os.sep +
+                                                 config["HomeScreen Buttons"]["terminal"]["image"])}
         self.screen_lock_button = tk.Button(self, bd=0,
                                             image=self.images["lock"],
                                             command=master.screen_lock)
@@ -89,6 +89,7 @@ class HomeIdleScreen(tk.Toplevel):
             self.width = 800
             self.height = 480
             self.pack_propagate(0)
+            self.geometry(self.master.winfo_geometry())
         else:
             self.attributes('-fullscreen', True)
             self.attributes("-topmost", True)
@@ -118,7 +119,7 @@ class HomeIdleScreen(tk.Toplevel):
         night_start = time.strptime(config["Clock Night Start"], "%H:%M")
         night_min = night_start.tm_hour * 60 + night_start.tm_min
         if night_min <= local_min or \
-                day_min >= local_min:
+                        day_min >= local_min:
             self.day.config(fg=config["Clock Night Color"])
             self.time.config(fg=config["Clock Night Color"])
             self.date.config(fg=config["Clock Night Color"])

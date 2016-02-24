@@ -26,11 +26,11 @@ class HomeGui(tk.Tk):
         self.idle_screen = None
         self.config(bg="dark gray")
         self.config(cursor="left_ptr")
-        self.idle_delay = config["Idle Delay"]
+        self.idle_delay = 0
         self.home_screen = pi_screen.HomeScreen(self)
         self.update_idletasks()
         x = (self.width/2) - (self.home_screen.winfo_reqwidth()/2)
-        y = (self.height/2) - (self.home_screen.winfo_reqheight()/2)
+        y = (self.height / 2) - (self.home_screen.winfo_reqheight() / 2)
         self.home_screen.place(x=x, y=y)
         self.update_idle_timer()
         self.check_for_updates()
@@ -41,16 +41,16 @@ class HomeGui(tk.Tk):
     def screen_lock(self):
         if self.idle_delay == config["Idle Delay"]:
             self.idle_delay = config["Locked Delay"]
-        elif self.idle_delay == config["Locked Delay"]:
+        else:
             self.idle_delay = config["Idle Delay"]
 
     def update_idle_timer(self, event=None):
         # Check the time and see if we should go idle, if not update the time again
         if self.idle_screen:
-            if common.idle() <= self.idle_delay:
+            if common.idle() < self.idle_delay:
                 self.do_home_screen()
         else:
-            if common.idle() > self.idle_delay:
+            if common.idle() >= self.idle_delay:
                 self.do_idle_screen()
         self.after(config["Idle Update"], self.update_idle_timer)
 
