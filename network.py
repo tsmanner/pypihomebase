@@ -12,6 +12,8 @@ def get_hostmap():
             hostmap = json.load(hostmap_fp)
         except json.decoder.JSONDecodeError:
             hostmap = {}
+        except ValueError:
+            hostmap = {}
         [print(ip, "->", host) for ip, host in hostmap.items()]
 
 
