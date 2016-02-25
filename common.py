@@ -57,7 +57,7 @@ else:
     except OSError as err:
         # Logging?
         print(err, "Idle timeout not available.")
-#        raise err
+        raise err
 
 
 def idle():
