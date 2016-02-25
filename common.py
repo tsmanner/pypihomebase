@@ -5,6 +5,7 @@ import subprocess
 import webbrowser
 
 LastInputInfo = None
+xss_available = False
 
 if os.name == 'nt':
     class LastInputInfo(ctypes.Structure):
@@ -54,10 +55,10 @@ else:
             raise OSError('XScreenSaverAllocInfo: Out of Memory.')
 
         rootwindow = libX11.XDefaultRootWindow(dpy_p)
+        xss_available = True
     except OSError as err:
         # Logging?
         print(err, "Idle timeout not available.")
-        raise err
 
 
 def idle():
@@ -75,6 +76,8 @@ def idle():
         """
         Return the idle time in milliseconds
         """
+        if not xss_available:
+            return 0
         # xss_info_p = libXss.XScreenSaverAllocInfo()
         if libXss.XScreenSaverQueryInfo(dpy_p, rootwindow, xss_info_p) == 0:
             return 0
