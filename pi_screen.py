@@ -37,27 +37,11 @@ class HomeScreen(Layer):
         """
         super().__init__(master)
         self.config(width=master.width, height=master.height)
-        self.images = {"lock": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                                  os.sep +
-                                                  config["HomeScreen Buttons"]["lock"]["image"]),
-                       "browser": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                                     os.sep +
-                                                     config["HomeScreen Buttons"]["browser"]["image"]),
-                       "terminal": tk.PhotoImage(file=os.path.dirname(__file__) +
-                                                 os.sep +
-                                                 config["HomeScreen Buttons"]["terminal"]["image"])}
-        self.screen_lock_button = tk.Button(self, bd=0,
-                                            image=self.images["lock"],
-                                            command=master.screen_lock)
-        self.screen_lock_button.pack(side=tk.LEFT)
-        self.open_browser_button = tk.Button(self, bd=0,
-                                             image=self.images["browser"],
-                                             command=common.open_browser)
-        self.open_browser_button.pack(side=tk.LEFT)
-        self.open_shell_button = tk.Button(self, bd=0,
-                                           image=self.images["terminal"],
-                                           command=self.open_shell)
-        self.open_shell_button.pack(side=tk.LEFT)
+        self.buttons = {}
+        for button_name in config["HomeScreen Buttons"]:
+            button_data = config["HomeScreen Buttons"][button_name]
+            self.buttons[button_name] = self.construct_button(button_data)
+
         self.quit_button = tk.Button(self, bd=0,
                                      text="X",
                                      font="Ariel 8",
@@ -65,6 +49,34 @@ class HomeScreen(Layer):
         self.update_idletasks()
         self.quit_button.place(x=self.winfo_reqwidth() - self.quit_button.winfo_reqwidth(), y=0)
         self.shell_process = None
+
+    def construct_button(self, button_data):
+        """
+        Construct a button from the data passed in.
+        :param button_data: dict
+        :return: tk.Button
+        """
+        image_name = button_data["config"]["image"]
+        button_data["config"]["image"] = tk.PhotoImage(file=os.path.dirname(__file__) + os.sep + image_name)
+        try:
+            module = button_data["config"]["command"]["module"]
+            function = button_data["config"]["command"]["function"]
+            if module != "":
+                exec("import %s" % module)
+                command = eval("%s.%s" % (module, function))
+            else:
+                command = eval("self.%s" % function)
+            button_data["config"]["command"] = command
+        except KeyError:
+            print(button_data)
+            raise KeyError("No command specified for button!")
+        button = tk.Button(self, bd=0, command=command)
+        for option in button_data["config"]:
+            eval("button.config(%s=button_data['config']['%s'])" % (option, option))
+        # Might as well hang on to the data from when it was spawned.
+        button.data = button_data
+        button.place(x=button_data["x"], y=button_data["y"])
+        return button
 
     def open_shell(self, event=None):
         if self.shell_process and self.shell_process.is_alive():

@@ -77,7 +77,7 @@ def idle():
         """
         # xss_info_p = libXss.XScreenSaverAllocInfo()
         if libXss.XScreenSaverQueryInfo(dpy_p, rootwindow, xss_info_p) == 0:
-            return None
+            return 0
         return xss_info_p.contents.idle
 
 
