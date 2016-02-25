@@ -10,9 +10,9 @@ def get_hostmap():
     with open(HOSTMAP_FILE) as hostmap_fp:
         try:
             hostmap = json.load(hostmap_fp)
-        except json.decoder.JSONDecodeError:
-            hostmap = {}
         except ValueError:
+            hostmap = {}
+        except json.decoder.JSONDecodeError:
             hostmap = {}
         [print(ip, "->", host) for ip, host in hostmap.items()]
 
@@ -51,6 +51,8 @@ def update_hostmap_file(ip, host):
     with open(HOSTMAP_FILE) as hostmap_fp:
         try:
             hostmap = json.load(hostmap_fp)
+        except ValueError:
+            hostmap = {}
         except json.decoder.JSONDecodeError:
             hostmap = {}
         hostmap[ip] = host
