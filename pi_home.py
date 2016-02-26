@@ -22,21 +22,42 @@ class HomeGui(tk.Tk):
             self.height = self.winfo_screenheight()
         self.focus_set()
         self.bind_all("<Escape>", lambda e: e.widget.quit())
-        self.wm_title("12 Pine Echo Home")
+        self.wm_title("Raspberry Pi Home Base")
         self.idle_screen = None
         self.config(bg="dark gray")
         self.config(cursor="left_ptr")
-        self.idle_delay = 0
         self.home_screen = pi_screen.HomeScreen(self)
         self.update_idletasks()
         x = (self.width/2) - (self.home_screen.winfo_reqwidth()/2)
         y = (self.height / 2) - (self.home_screen.winfo_reqheight() / 2)
         self.home_screen.place(x=x, y=y)
-        self.update_idle_timer()
+        self.idle_delay = config["Idle Delay"]
         self.check_for_updates()
         self.mouse_hide_timer_id = None
         self.show_mouse()
         self.bind_all("<Motion>", self.show_mouse)
+        self.timed_events = {}
+        [self.add_event(event_name) for event_name in config["Timed Events"]]
+
+    def every(self, ms, func=None, *args):
+        super().after(ms, func, *args)
+        self.after(ms, self.every, ms, func, *args)
+
+    def add_event(self, event_name):
+        event_data = config["Timed Events"][event_name]
+        try:
+            module = event_data["command"]["module"]
+            function = event_data["command"]["function"]
+            if module != "":
+                exec("import %s" % module)
+                command = eval("%s.%s" % (module, function))
+            else:
+                command = eval("self.%s" % function)
+            event_data["command"] = command
+        except KeyError:
+            print(event_data)
+            raise KeyError("No command specified for button!")
+        self.every(event_data["time"], command)
 
     def screen_lock(self):
         if self.idle_delay == config["Idle Delay"]:
@@ -52,7 +73,6 @@ class HomeGui(tk.Tk):
         else:
             if common.idle() >= self.idle_delay:
                 self.do_idle_screen()
-        self.after(config["Idle Update"], self.update_idle_timer)
 
     def do_idle_screen(self, event=None):
         self.idle_delay = config["Idle Delay"]
@@ -67,7 +87,6 @@ class HomeGui(tk.Tk):
         updated = common.git_update()
         if updated:
             os.execl(sys.executable, sys.executable, *sys.argv)
-        self.after(config["Update Delay"], self.check_for_updates)
 
     def hide_mouse(self, event=None):
         self.config(cursor="none")
