@@ -56,7 +56,7 @@ class HomeGui(tk.Tk):
             event_data["command"] = command
         except KeyError:
             print(event_data)
-            raise KeyError("No command specified for button!")
+            raise KeyError("No command specified for timed event!")
         self.every(event_data["time"], command)
 
     def screen_lock(self):
