@@ -40,8 +40,6 @@ class HomeGui(tk.Tk):
         [self.add_screen(screen, self.settings["Screens"][screen]) for screen in self.settings["Screens"]]
         [self.add_event(event, self.settings["Timed Events"][event]) for event in self.settings["Timed Events"]]
         self.current_screen = self.screens[self.settings["Boot Screen"]]
-        print("Current Screen:", self.settings["Boot Screen"], end=' ')
-        print(self.current_screen)
         self.update_idletasks()
         x = (self.width/2) - (self.current_screen.winfo_reqwidth()/2)
         y = (self.height / 2) - (self.current_screen.winfo_reqheight() / 2)

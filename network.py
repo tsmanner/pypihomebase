@@ -20,7 +20,7 @@ def get_hostmap():
 
 def get_hostmap_strings():
     hostmap = get_hostmap()
-    return ["%s -> %s" % (ip, host) for ip, host in hostmap.items()]
+    return ["%s -> %s" % (ip.ljust(15), host) for ip, host in hostmap.items()]
 
 
 def update_hostmap():
@@ -42,7 +42,6 @@ def update_ip(ip):
         host = socket.gethostbyaddr(ip)[0]
         update_hostmap_file(ip, host)
     except socket.herror:
-#        print("Adding", ip, "->", None)
         pass
 
 
@@ -67,8 +66,6 @@ def update_hostmap_file(ip, host):
             hostmap.pop(ip)
             print("Updating ", ip, "->", host)
             hostmap[ip] = host
-#        else:
-#            print("Unchanged", ip, "->", host)
 
     with open(HOSTMAP_FILE, "w") as hostmap_fp:
         json.dump(hostmap, hostmap_fp)
@@ -83,16 +80,21 @@ class HostmapFrame(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         self.config(width=500, height=480)
-        self.text = tk.Listbox(self)
+        self.hostmap_strings = []
+        self.text = tk.Listbox(self, font="courier 9")
         width = 82
         self.update_text()
         self.text.config(width=width, height=50)
         self.text.place(x=0, y=0)
 
     def update_text(self):
-        self.text.delete(0, tk.END)
-        for line in get_hostmap_strings():
-            self.text.insert(tk.END, line + os.linesep)
+        hostmap_strings = get_hostmap_strings()
+        hostmap_strings.sort()
+        if self.hostmap_strings != hostmap_strings:
+            self.hostmap_strings = hostmap_strings
+            self.text.delete(0, tk.END)
+            for line in self.hostmap_strings:
+                self.text.insert(tk.END, line + os.linesep)
 
 
 if not os.path.exists(HOSTMAP_FILE):
@@ -100,6 +102,6 @@ if not os.path.exists(HOSTMAP_FILE):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    map = HostmapFrame(root)
-    map.pack()
+    hmap = HostmapFrame(root)
+    hmap.pack()
     root.mainloop()
