@@ -2,6 +2,7 @@ import json
 import multiprocessing
 import os
 import socket
+import tkinter as tk
 
 HOSTMAP_FILE = os.path.dirname(__file__) + os.sep + "hostmap"
 
@@ -14,7 +15,12 @@ def get_hostmap():
             hostmap = {}
         except json.decoder.JSONDecodeError:
             hostmap = {}
-        [print(ip, "->", host) for ip, host in hostmap.items()]
+        return hostmap
+
+
+def get_hostmap_strings():
+    hostmap = get_hostmap()
+    return ["%s -> %s" % (ip, host) for ip, host in hostmap.items()]
 
 
 def update_hostmap():
@@ -34,10 +40,9 @@ def update_hostmap():
 def update_ip(ip):
     try:
         host = socket.gethostbyaddr(ip)[0]
-        print("Adding", ip, "->", host)
         update_hostmap_file(ip, host)
     except socket.herror:
-        print("Adding", ip, "->", None)
+#        print("Adding", ip, "->", None)
         pass
 
 
@@ -55,7 +60,16 @@ def update_hostmap_file(ip, host):
             hostmap = {}
         except json.decoder.JSONDecodeError:
             hostmap = {}
-        hostmap[ip] = host
+        if ip not in hostmap:
+            print("Adding   ", ip, "->", host)
+            hostmap[ip] = host
+        elif hostmap[ip] != host:
+            hostmap.pop(ip)
+            print("Updating ", ip, "->", host)
+            hostmap[ip] = host
+#        else:
+#            print("Unchanged", ip, "->", host)
+
     with open(HOSTMAP_FILE, "w") as hostmap_fp:
         json.dump(hostmap, hostmap_fp)
 
@@ -65,5 +79,27 @@ def do_update():
     update_process.start()
 
 
+class HostmapFrame(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.config(width=500, height=480)
+        self.text = tk.Listbox(self)
+        width = 82
+        self.update_text()
+        self.text.config(width=width, height=50)
+        self.text.place(x=0, y=0)
+
+    def update_text(self):
+        self.text.delete(0, tk.END)
+        for line in get_hostmap_strings():
+            self.text.insert(tk.END, line + os.linesep)
+
+
 if not os.path.exists(HOSTMAP_FILE):
     open(HOSTMAP_FILE, 'w').close()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    map = HostmapFrame(root)
+    map.pack()
+    root.mainloop()

@@ -1,46 +1,59 @@
 import common
-from config import config
+import config
 import multiprocessing
 import os
 import time
 import tkinter as tk
-import webbrowser
 
 
-class Layer(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.visible = False
+def construct_element(master, data):
+    """
+    Construct a button from the data passed in.
+    :param master: str
+    :param data: dict
+    :return: tk.Button
+    """
+    # See what imports we need to do:
+    if "module" in data:
+        module = data["module"]
+        exec("import %s" % module)
+    else:
+        module = "tk"
+    if "config" in data and "command" in data["config"]:
+        command_module = data["config"]["command"]["module"]
+        function = data["config"]["command"]["function"]
+        if command_module != "":
+            exec("import %s" % command_module)
+            command = "%s.%s" % (command_module, function)
+        else:
+            command = "%s" % function
+        data["config"]["command"] = command
 
-    def pack(self, *args, **kwargs):
-        super().pack(*args, **kwargs)
-        self.visible = True
-
-    def place(self, *args, **kwargs):
-        super().place(*args, **kwargs)
-        self.visible = True
-
-    def pack_forget(self):
-        super().pack_forget()
-        self.visible = False
-
-    def place_forget(self):
-        super().place_forget()
-        self.visible = False
+    element = eval("%s.%s(master)" % (module, data["type"]))
+    for option in data["config"]:
+        value = data["config"][option]
+#            print(option, ":", value)
+        eval("element.config(%s=%s)" % (option, value))
+    element.place(x=data["x"], y=data["y"])
+    print(type(element))
+    return element
 
 
-class HomeScreen(Layer):
-    def __init__(self, master):
+class Screen(tk.Frame):
+    def __init__(self, master, name, data):
         """
         :param master: HomeGui
         :return:
         """
         super().__init__(master)
+        self.name = name
         self.config(width=master.width, height=master.height)
-        self.buttons = {}
-        for button_name in config["HomeScreen Buttons"]:
-            button_data = config["HomeScreen Buttons"][button_name]
-            self.buttons[button_name] = self.construct_button(button_data)
+        for item in data:
+            if item == "elements":
+                self.elements = {element_name:construct_element(self, data[item][element_name])
+                                 for element_name in data[item]}
+            else:
+                eval("self.config(%s=%s)" % (item, data[item]))
 
         self.quit_button = tk.Button(self, bd=0,
                                      text="X",
@@ -49,34 +62,6 @@ class HomeScreen(Layer):
         self.update_idletasks()
         self.quit_button.place(x=self.winfo_reqwidth() - self.quit_button.winfo_reqwidth(), y=0)
         self.shell_process = None
-
-    def construct_button(self, button_data):
-        """
-        Construct a button from the data passed in.
-        :param button_data: dict
-        :return: tk.Button
-        """
-        image_name = button_data["config"]["image"]
-        button_data["config"]["image"] = tk.PhotoImage(file=os.path.dirname(__file__) + os.sep + image_name)
-        try:
-            module = button_data["config"]["command"]["module"]
-            function = button_data["config"]["command"]["function"]
-            if module != "":
-                exec("import %s" % module)
-                command = eval("%s.%s" % (module, function))
-            else:
-                command = eval("self.%s" % function)
-            button_data["config"]["command"] = command
-        except KeyError:
-            print(button_data)
-            raise KeyError("No command specified for button!")
-        button = tk.Button(self, bd=0, command=command)
-        for option in button_data["config"]:
-            eval("button.config(%s=button_data['config']['%s'])" % (option, option))
-        # Might as well hang on to the data from when it was spawned.
-        button.data = button_data
-        button.place(x=button_data["x"], y=button_data["y"])
-        return button
 
     def open_shell(self, event=None):
         if self.shell_process and self.shell_process.is_alive():
@@ -110,15 +95,15 @@ class HomeIdleScreen(tk.Toplevel):
         self.config(bg="black", cursor="none")
         self.update_time_id = None
         self.day = tk.Label(self,
-                            font=config["Date Font"],
+                            font=self.master.settings["Date Font"],
                             bg='black',
                             anchor=tk.N)
         self.time = tk.Label(self,
-                             font=config["Time Font"],
+                             font=self.master.settings["Time Font"],
                              bg='black',
                              anchor=tk.N)
         self.date = tk.Label(self,
-                             font=config["Date Font"],
+                             font=self.master.settings["Date Font"],
                              bg='black',
                              anchor=tk.N)
         self.update_time()
@@ -126,19 +111,19 @@ class HomeIdleScreen(tk.Toplevel):
     def update_time(self, event=None):
         localtime = time.localtime()
         local_min = localtime.tm_hour * 60 + localtime.tm_min
-        day_start = time.strptime(config["Clock Day Start"], "%H:%M")
+        day_start = time.strptime(self.master.settings["Clock Day Start"], "%H:%M")
         day_min = day_start.tm_hour * 60 + day_start.tm_min
-        night_start = time.strptime(config["Clock Night Start"], "%H:%M")
+        night_start = time.strptime(self.master.settings["Clock Night Start"], "%H:%M")
         night_min = night_start.tm_hour * 60 + night_start.tm_min
         if night_min <= local_min or \
                         day_min >= local_min:
-            self.day.config(fg=config["Clock Night Color"])
-            self.time.config(fg=config["Clock Night Color"])
-            self.date.config(fg=config["Clock Night Color"])
+            self.day.config(fg=self.master.settings["Clock Night Color"])
+            self.time.config(fg=self.master.settings["Clock Night Color"])
+            self.date.config(fg=self.master.settings["Clock Night Color"])
         else:
-            self.day.config(fg=config["Clock Day Color"])
-            self.time.config(fg=config["Clock Day Color"])
-            self.date.config(fg=config["Clock Day Color"])
+            self.day.config(fg=self.master.settings["Clock Day Color"])
+            self.time.config(fg=self.master.settings["Clock Day Color"])
+            self.date.config(fg=self.master.settings["Clock Day Color"])
         self.day.config(text=time.strftime("%A"))
         self.time.config(text=time.strftime("%H:%M"))
         self.date.config(text=time.strftime("%B %d %Y"))
