@@ -1,9 +1,11 @@
 import ctypes
 import ctypes.util
+import multiprocessing
 import os
 import subprocess
 import webbrowser
 
+SHELL_PROCESS = None
 LastInputInfo = None
 xss_available = False
 
@@ -109,17 +111,100 @@ def git_update():
 
 
 def open_shell():
+    global SHELL_PROCESS
+    if SHELL_PROCESS and SHELL_PROCESS.is_alive():
+        if os.name == "nt":
+
+            pass  # TODO how does this work in windows?
+        else:
+            elevate_str = "wmctrl -ia $(wmctrl -lp | awk -vpid={0} '$3==pid {print $1; exit}')"
+            os.system(elevate_str.format(SHELL_PROCESS.pid))
+    else:
+        if SHELL_PROCESS:
+            SHELL_PROCESS.join()
+        SHELL_PROCESS = multiprocessing.Process(target=open_shell_target)
+        SHELL_PROCESS.start()
+
+
+def open_shell_target():
+    global SHELL_PROCESS
     if os.name == "nt":
         # TODO how does this work in Windows?
         print("opening cmd.exe")
     else:
         print("opening lxterminal")
-        shell_process = subprocess.Popen(["lxterminal"])
-        shell_process.communicate()
+        SHELL_PROCESS = subprocess.Popen(["lxterminal"])
+        SHELL_PROCESS.communicate()
 
 
 def open_browser(event=None):
     webbrowser.open("http://www.google.com")
+
+
+class BidirectionalDict:
+    def __init__(self):
+        self._list1 = []
+        self._list2 = []
+
+    def insert(self, a, b):
+        # If a and b are not in the map anywhere, just do the appends
+        if a not in self._list1 and a not in self._list2 and b not in self._list1 and b not in self._list2:
+            self._list1.append(a)
+            self._list2.append(b)
+        elif a in self._list1:
+            if b in self._list1 or (b in self._list2 and self[a] != b):
+                raise KeyError("Insert a->b mapping conflict! b in map with different key already!")
+            # Update the mapping
+            self._list2[self._list1.index(a)] = b
+        elif a in self._list2:
+            if b in self._list2 or (b in self._list1 and self[a] != b):
+                raise KeyError("Insert a->b mapping conflict! b in map with different key already!")
+            # Update the mapping
+            self._list1[self._list2.index(a)] = b
+        elif b in self._list1:
+            if a in self._list1 or (a in self._list2 and self[b] != a):
+                raise KeyError("Insert a->b mapping conflict! a in map with different key already!")
+            # Update the mapping
+            self._list2[self._list1.index(b)] = a
+        elif b in self._list2:
+            if a in self._list2 or (a in self._list1 and self[b] != a):
+                raise KeyError("Insert a->b mapping conflict! a in map with different key already!")
+            # Update the mapping
+            self._list1[self._list2.index(b)] = a
+
+    def items(self):
+        return list(zip(self._list1, self._list2))
+
+    def __contains__(self, item):
+        if item in self._list1:
+            return item in self._list1
+        return item in self._list2
+
+    def __len__(self):
+        if len(self._list1) != len(self._list2):
+            raise AttributeError("Mismatched list lengths!")
+        return len(self._list1)
+
+    def __iter__(self):
+        return zip(self._list1, self._list2)
+
+    def __delitem__(self, key):
+        if key in self._list1:
+            del self._list2[self._list1.index(key)]
+            del self._list1[self._list1.index(key)]
+        elif key in self._list2:
+            del self._list1[self._list2.index(key)]
+            del self._list2[self._list2.index(key)]
+        else:
+            raise KeyError("Key " + str(key) + " not in map!")
+
+    def __getitem__(self, item):
+        if item in self._list1:
+            return self._list2[self._list1.index(item)]
+        elif item in self._list2:
+            return self._list1[self._list2.index(item)]
+        else:
+            raise KeyError("Key " + str(item) + " not in map!")
 
 
 if __name__ == '__main__':

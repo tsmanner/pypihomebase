@@ -1,3 +1,4 @@
+import common
 import json
 import multiprocessing
 import os
@@ -9,18 +10,17 @@ HOSTMAP_FILE = os.path.dirname(__file__) + os.sep + "hostmap"
 
 def get_hostmap():
     with open(HOSTMAP_FILE) as hostmap_fp:
+        hostmap = common.BidirectionalDict()
         try:
-            hostmap = json.load(hostmap_fp)
-        except ValueError:
-            hostmap = {}
+            [hostmap.insert(item[0], item[1]) for item in json.load(hostmap_fp)]
         except json.decoder.JSONDecodeError:
-            hostmap = {}
+            pass
         return hostmap
 
 
 def get_hostmap_strings():
     hostmap = get_hostmap()
-    return ["%s -> %s" % (ip.ljust(15), host) for ip, host in hostmap.items()]
+    return ["%s -> %s" % (ip.ljust(15), host) for ip, host in hostmap]
 
 
 def update_hostmap():
@@ -53,22 +53,17 @@ def do_update_ip(ip):
 
 def update_hostmap_file(ip, host):
     with open(HOSTMAP_FILE) as hostmap_fp:
-        try:
-            hostmap = json.load(hostmap_fp)
-        except ValueError:
-            hostmap = {}
-        except json.decoder.JSONDecodeError:
-            hostmap = {}
-        if ip not in hostmap:
-            print("Adding   ", ip, "->", host)
-            hostmap[ip] = host
-        elif hostmap[ip] != host:
-            hostmap.pop(ip)
-            print("Updating ", ip, "->", host)
-            hostmap[ip] = host
-
+        hostmap = get_hostmap()
+        if host not in hostmap:
+            hostmap.insert(ip, host)
+            print("Adding", host + ": " + ip)
+        else:
+            if hostmap[host] != ip:
+                print("Updating " + host + ": " + hostmap[host] + "->" + ip)
+                del hostmap[host]
+                hostmap.insert(ip, host)
     with open(HOSTMAP_FILE, "w") as hostmap_fp:
-        json.dump(hostmap, hostmap_fp)
+        json.dump(hostmap.items(), hostmap_fp)
 
 
 def do_update():
@@ -83,9 +78,9 @@ class HostmapFrame(tk.Frame):
         self.hostmap_strings = []
         self.text = tk.Listbox(self, font="courier 9")
         width = 82
-        self.update_text()
         self.text.config(width=width, height=50)
         self.text.place(x=0, y=0)
+        self.update_text()
 
     def update_text(self):
         hostmap_strings = get_hostmap_strings()
@@ -95,12 +90,14 @@ class HostmapFrame(tk.Frame):
             self.text.delete(0, tk.END)
             for line in self.hostmap_strings:
                 self.text.insert(tk.END, line + os.linesep)
+        self.after(500, self.update_text)
 
 
 if not os.path.exists(HOSTMAP_FILE):
     open(HOSTMAP_FILE, 'w').close()
 
 if __name__ == "__main__":
+    do_update()
     root = tk.Tk()
     hmap = HostmapFrame(root)
     hmap.pack()
