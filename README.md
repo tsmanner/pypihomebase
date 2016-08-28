@@ -15,4 +15,4 @@ Initial config: Make the following file modifications:
 |                                             |
 +---------------------------------------------+
 
-Then go to /etc/rx.local and add startx just above the exit 0
+Then go to ~/.bashrc and add startx just before the end
