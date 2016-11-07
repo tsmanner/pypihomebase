@@ -12,7 +12,7 @@ def get_hostmap():
     with open(HOSTMAP_FILE) as hostmap_fp:
         hostmap = common.BidirectionalDict()
         try:
-            [hostmap.insert(item[0], item[1]) for item in json.load(hostmap_fp)]
+            [hostmap.__setitem__(item[0], item[1]) for item in json.load(hostmap_fp)]
         except json.decoder.JSONDecodeError:
             pass
         return hostmap
@@ -55,13 +55,13 @@ def update_hostmap_file(ip, host):
     with open(HOSTMAP_FILE) as hostmap_fp:
         hostmap = get_hostmap()
         if host not in hostmap:
-            hostmap.insert(ip, host)
+            hostmap[ip] = host
             print("Adding", host + ": " + ip)
         else:
             if hostmap[host] != ip:
                 print("Updating " + host + ": " + hostmap[host] + "->" + ip)
                 del hostmap[host]
-                hostmap.insert(ip, host)
+                hostmap[ip] = host
     with open(HOSTMAP_FILE, "w") as hostmap_fp:
         json.dump(hostmap.items(), hostmap_fp)
 

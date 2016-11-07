@@ -10,7 +10,7 @@ import tkinter as tk
 
 class HomeGui(tk.Tk):
     def __init__(self):
-        tk.Tk.__init__(self)
+        super().__init__()
         if os.name == "nt":
             self.config(width=800, height=480)
             self.width = 800
@@ -32,7 +32,7 @@ class HomeGui(tk.Tk):
         self.mouse_hide_timer_id = None
         self.screens = {}
         self.timed_events = {}
-        # Setup base funcitonality for idle and mouse visibility
+        # Setup base functionality for idle and mouse visibility
         self.check_for_updates()
         self.show_mouse()
         self.bind_all("<Motion>", self.show_mouse)
@@ -94,7 +94,8 @@ class HomeGui(tk.Tk):
             self.idle_screen.destroy()
             self.idle_screen = None
 
-    def check_for_updates(self, event=None):
+    @staticmethod
+    def check_for_updates(event=None):
         updated = common.git_update()
         if updated:
             os.execl(sys.executable, sys.executable, *sys.argv)

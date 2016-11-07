@@ -146,7 +146,7 @@ class BidirectionalDict:
         self._list1 = []
         self._list2 = []
 
-    def insert(self, a, b):
+    def __setitem__(self, a, b):
         # If a and b are not in the map anywhere, just do the appends
         if a not in self._list1 and a not in self._list2 and b not in self._list1 and b not in self._list2:
             self._list1.append(a)
@@ -177,7 +177,7 @@ class BidirectionalDict:
 
     def __contains__(self, item):
         if item in self._list1:
-            return item in self._list1
+            return True
         return item in self._list2
 
     def __len__(self):
